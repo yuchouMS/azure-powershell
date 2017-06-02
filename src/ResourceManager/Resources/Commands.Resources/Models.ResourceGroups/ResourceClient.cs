@@ -138,13 +138,16 @@ namespace Microsoft.Azure.Commands.Resources.Models
 
         internal List<PSPermission> GetResourcePermissions(ResourceIdentifier identity)
         {
-            PermissionGetResult permissionsResult = AuthorizationManagementClient.Permissions.ListForResource(
-                    identity.ResourceGroupName,
-                    identity.ToResourceIdentity());
+			IList<Permission> permissionsResult = AuthorizationManagementClient.Permissions.ListForResource(
+					identity.ResourceGroupName,
+					identity.ToResourceIdentity(),
+					identity.ParentResource,
+					identity.ResourceType,
+					identity.ResourceName);
 
-            if (permissionsResult != null)
+			if (permissionsResult != null)
             {
-                return permissionsResult.Permissions.Select(p => p.ToPSPermission()).ToList();
+                return permissionsResult.Select(p => p.ToPSPermission()).ToList();
             }
 
             return null;
@@ -353,13 +356,13 @@ namespace Microsoft.Azure.Commands.Resources.Models
             return resources;
         }
 
-        public ProviderOperationsMetadata GetProviderOperationsMetadata(string providerNamespace)
+        public Management.Resources.Models.ProviderOperationsMetadata GetProviderOperationsMetadata(string providerNamespace)
         {
             ProviderOperationsMetadataGetResult result = this.ResourceManagementClient.ProviderOperationsMetadata.Get(providerNamespace);
             return result.Provider;
         }
 
-        public IList<ProviderOperationsMetadata> ListProviderOperationsMetadata()
+        public IList<Management.Resources.Models.ProviderOperationsMetadata> ListProviderOperationsMetadata()
         {
             ProviderOperationsMetadataListResult result = this.ResourceManagementClient.ProviderOperationsMetadata.List();
             return result.Providers;
