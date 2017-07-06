@@ -59,7 +59,8 @@ namespace Microsoft.Azure.Commands.AnalysisServices.Models
             string skuName = null,
             Hashtable customTags = null,
             string administrators = null,
-            AnalysisServicesServer existingServer = null)
+            AnalysisServicesServer existingServer = null,
+            string backupBlobContainerUri = null)
         {
             if (string.IsNullOrEmpty(resourceGroupName))
             {
@@ -87,9 +88,18 @@ namespace Microsoft.Azure.Commands.AnalysisServices.Models
                 var updateParameters = new AnalysisServicesServerUpdateParameters()
                 {
                     Sku = skuName == null ? existingServer.Sku : GetResourceSkuFromName(skuName),
-                    Tags = tags,
-                    AsAdministrators = new ServerAdministrators(adminList)
+                    Tags = tags
                 };
+
+                if (administrators != null)
+                {
+                    updateParameters.AsAdministrators = new ServerAdministrators(adminList);
+                }
+
+                if (backupBlobContainerUri != null)
+                {
+                    updateParameters.BackupBlobContainerUri = backupBlobContainerUri;
+                }
 
                 newOrUpdatedServer = _client.Servers.Update(resourceGroupName, serverName, updateParameters);
             }
@@ -101,6 +111,7 @@ namespace Microsoft.Azure.Commands.AnalysisServices.Models
                     new AnalysisServicesServer()
                     {
                         AsAdministrators = new ServerAdministrators(adminList),
+                        BackupBlobContainerUri = backupBlobContainerUri,
                         Location = location,
                         Sku = GetResourceSkuFromName(skuName),
                         Tags = tags
